@@ -1,18 +1,28 @@
-import pygame, sys, random
+#!/Users/gravic/.local/share/virtualenvs/orange-rain-foR5V4Is/bin/python
+import pygame
+import sys
+import random
 
 pygame.init()
 pygame.font.init()
 
+black = 0, 0, 0
+green = 0, 255, 70
+orange = 254, 153, 0
+orangeHighlight = 250, 200, 70
+greenHighlight = 70, 255, 70
+
 size = width, height = 600, 400
 symbolSize = 21
-black = 0, 0, 0
-color = 0, 255, 70
-lightColor = 250, 255, 250
+fontFace = "NotoSansCJK-Medium.ttc"
+currentColor = orange
+currentHighlight = orangeHighlight
 
-screen = pygame.display.set_mode(size, pygame.SRCALPHA)
+screen = pygame.display.set_mode(size)
+screen.fill(black)
 pygame.display.set_caption("Orange Rain")
 clock = pygame.time.Clock()
-font = pygame.font.Font("NotoSansCJK-Medium.ttc", symbolSize)
+font = pygame.font.Font(fontFace, symbolSize)
 frameCnt = 0
 
 
@@ -24,24 +34,23 @@ class Symbol:
         self.speed = speed
         self.isFirst = isFirst
         self.changeInterval = random.randint(4, 21)
-	
+
     def setRandomValue(self):
-        if  frameCnt % self.changeInterval == 0:
+        if frameCnt % self.changeInterval == 0:
             charType = random.randint(0, 5)
             if charType > 1:
                 # set to a katakana character
-                uniChar = 0x30A0 + random.randint(0, 96)
+                uniChar = 0x30A0 + random.randint(0, 95)
                 self.value = chr(uniChar)
             else:
                 # set to number
-                self.value = str(random.randint(0,9))
-	
+                self.value = str(random.randint(0, 9))
+
     def render(self):
         if self.isFirst:
-            textSurface = font.render(self.value, True, lightColor)
-            print('LIGHT')
+            textSurface = font.render(self.value, True, currentHighlight)
         else:
-            textSurface = font.render(self.value, True, color)
+            textSurface = font.render(self.value, True, currentColor)
         textRect = textSurface.get_rect()
         textRect.center = (self.x, self.y)
         screen.blit(textSurface, textRect)
@@ -59,7 +68,8 @@ class Stream:
     def __init__(self):
         self.symbols = []
         self.symbolCnt = random.randint(2, 12)
-        self.speed = random.randint(3, 9)
+        self.speed = random.randint(2, 5)
+        # self.speed = 1
 
     def generateSymbols(self, x, y):
         isFirst = True if random.randint(0, 4) == 1 else False
@@ -72,11 +82,6 @@ class Stream:
 
     def render(self):
         for sym in self.symbols:
-            # TODO Can't I just call sym.render() here instead?
-            #textSurface = font.render(sym.value, True, color)
-            #textRect = textSurface.get_rect()
-            #textRect.center = (sym.x, sym.y)
-            #screen.blit(textSurface, textRect)
             sym.render()
             sym.setRandomValue()
             sym.fall()
@@ -91,26 +96,32 @@ while y < width:
     y += symbolSize
 
 
-
 while True:
     for e in pygame.event.get():
-        if e.type == pygame.QUIT:
+        if e.type == pygame.QUIT or e.type == pygame.K_ESCAPE:
             sys.exit()
 
-    screen.fill(black)
+        if e.type == pygame.KEYDOWN:
+            if e.key == pygame.K_ESCAPE:
+                sys.exit()
+            if e.key == pygame.K_SPACE:
+                if currentColor == orange:
+                    currentColor = green
+                    currentHighlight = greenHighlight
+                else:
+                    currentColor = orange
+                    currentHighlight = orangeHighlight
+
+    fauxScreen = pygame.Surface((width, height))
+    fauxScreen.set_alpha(125)
+    fauxScreen.fill(black)
+    screen.blit(fauxScreen, (0, 0))
     for stream in streams:
         stream.render()
-    
-    pressed = pygame.key.get_pressed()
-    if pressed[pygame.K_UP]:
-        color = 254, 153, 0
 
-    if pressed[pygame.K_LEFT]:
-        thrust += -1
-
-    if pressed[pygame.K_RIGHT]:
-        thrust += 1
-
+    # pressed = pygame.key.get_pressed()
+    # if pressed[pygame.K_ESCAPE]:
+    #     sys.exit()
 
     pygame.display.flip()
 
