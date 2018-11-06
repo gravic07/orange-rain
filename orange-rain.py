@@ -12,7 +12,7 @@ orange = 254, 153, 0
 orangeHighlight = 250, 200, 70
 greenHighlight = 70, 255, 70
 
-size = width, height = 600, 400
+size = width, height = 1280, 720
 symbolSize = 21
 fontFace = "NotoSansCJK-Medium.ttc"
 currentColor = orange
@@ -63,13 +63,20 @@ class Symbol:
         else:
             self.y += self.speed
 
+    def adjustSpeed(self, direction):
+        if direction == "up":
+            self.speed += 1
+        elif direction == "down":
+            self.speed -= 1
+        else:
+            pass
+
 
 class Stream:
     def __init__(self):
         self.symbols = []
         self.symbolCnt = random.randint(2, 12)
         self.speed = random.randint(2, 5)
-        # self.speed = 1
 
     def generateSymbols(self, x, y):
         isFirst = True if random.randint(0, 4) == 1 else False
@@ -91,7 +98,7 @@ streams = []
 y = 0
 while y < width:
     stream = Stream()
-    stream.generateSymbols(y, 0)
+    stream.generateSymbols(y, random.randint(-200, -5))
     streams.append(stream)
     y += symbolSize
 
@@ -111,6 +118,14 @@ while True:
                 else:
                     currentColor = orange
                     currentHighlight = orangeHighlight
+            if e.key == pygame.K_UP:
+                for stream in streams:
+                    for symbol in stream.symbols:
+                        symbol.adjustSpeed("up")
+            if e.key == pygame.K_DOWN:
+                for stream in streams:
+                    for symbol in stream.symbols:
+                        symbol.adjustSpeed("down")
 
     fauxScreen = pygame.Surface((width, height))
     fauxScreen.set_alpha(125)
